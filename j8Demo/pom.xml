@@ -19,7 +19,11 @@
             </plugin>
         </plugins>
     </build>
-
+    <parent>
+        <artifactId>j8Demo</artifactId>
+        <groupId>org.bill</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <properties>
         <java.version>1.8</java.version>
     </properties>
