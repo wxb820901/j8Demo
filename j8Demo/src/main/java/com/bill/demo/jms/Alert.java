@@ -20,7 +20,7 @@ public class Alert implements MessageCreator {
 
     public MapMessage createMapMessage(Session session) throws JMSException {
         MapMessage message = session.createMapMessage();
-        message.setJMSType("ALERTS_NOTIFICATION");//header type
+        message.setJMSType("sometype");//header type
         message.setString("id", id);
        
         return message;
