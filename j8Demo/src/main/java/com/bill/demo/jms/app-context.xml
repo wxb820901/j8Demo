@@ -13,7 +13,7 @@
     </bean>
 
 
-    <bean id="queueConnectionFactory" class="com.ubs.f35.transports.jms.ConnectionFactoryWrapper">
+    <bean id="queueConnectionFactory" class="ConnectionFactoryWrapper">
         <property name="serverUrl" value="<SSL:***/TCP:***>"/>
         <property name="userName" value="<username>"/>
         <property name="userPassword" value="password"/>
@@ -21,7 +21,7 @@
         <property name="emsSSLIdentity" value="<*.cert.p12>" /><!--will be read by bytes-->
         <property name="SSLPassword" value="<password>" />
         <property name="emsSSLTrustedCertificate" value="<*.pem>" /><!--will be read by bytes-->
-        <property name="SSLIdentityEncoding" value=p12" />
+        <property name="SSLIdentityEncoding" value="p12" />
         <property name="SSLEnableVerifyHostName" value="false" />
         <!--<property name="SSLExpectedHostName" value="${yggdrasil.neoNotifications.jms.ssl.expected.hostname:}" />-->
         <!--<property name="clientID" value="${yggdrasil.neoNotifications.jms.client.id:}" />-->
