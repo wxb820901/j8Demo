@@ -18,15 +18,15 @@ public class ExampleApp {
         SpringApplication app = new SpringApplication(ExampleApp.class);
         app.addListeners(
                 event -> {
-                    System.out.println("====>");
-                    System.out.println("====>====>");
-                    System.out.println("====>====>====>");
-                    System.out.println("====>====>====>====>");
-                    System.out.println("====>====>====>====>====>" + event.getClass().getName());
-                    System.out.println("====>====>====>====>");
-                    System.out.println("====>====>====>");
-                    System.out.println("====>====>");
-                    System.out.println("====>");
+                    System.out.println("====> ");
+                    System.out.println("====> ====> ");
+                    System.out.println("====> ====> ====> ");
+                    System.out.println("====> ====> ====> ====> ");
+                    System.out.println("====> ====> ====> ====> ====> " + event.getClass().getName());
+                    System.out.println("====> ====> ====> ====> ");
+                    System.out.println("====> ====> ====> ");
+                    System.out.println("====> ====> ");
+                    System.out.println("====> ");
                 }
         );
         app.run(args);
