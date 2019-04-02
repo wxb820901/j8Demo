@@ -1,10 +1,10 @@
-package com.b.annotation;
+package com.bill.demo.annotation;
 
 import java.lang.reflect.Method;
 public class TestAnnotation {  
      
         public static void main(String args[]) throws ClassNotFoundException, NoSuchMethodException, SecurityException{  
-                Class<?> cls = Class.forName("com.b.annotation.AnnotationDemo");  
+                Class<?> cls = Class.forName("com.bill.demo.annotation.AnnotationDemo");
                 boolean flag = cls.isAnnotationPresent(MyAnnotation1.class);  
                 if(flag){  
                         System.out.println("????annotation");  

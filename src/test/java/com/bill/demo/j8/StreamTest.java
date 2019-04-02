@@ -2,11 +2,9 @@ package com.bill.demo.j8;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.IntSummaryStatistics;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by WANGBIL on 7/25/2016.
@@ -62,5 +60,33 @@ public class StreamTest {
         System.out.println("Sum of all numbers : " + stats.getSum());
         System.out.println("Average of all numbers : " + stats.getAverage());
     }
+
+    @Test
+    public void testCreateStream(){
+        List<Integer> numbers = Arrays.asList(3, 2, 2, 3, 7, 3, 5);
+        Stream<Integer> numStream = numbers.stream();
+        System.out.println("numStream : " + numStream.toString());
+        System.out.println("numStream : " + Stream.of(3, 2, 2, 3, 7, 3, 5).toString());
+    }
+
+    @Test
+    public void testStreamAction(){
+        Stream.of(3, 2, 2, 3, 7, 3, 5).filter(n->n>3).forEach(System.out::print);
+        System.out.println();
+        Stream.of(3, 2, 2, 3, 7, 3, 5).map(n->n*3).forEach(System.out::print);
+        System.out.println();
+        Stream.of(3, 2, 2, 3, 7, 3, 5).limit(4).forEach(System.out::print);
+        System.out.println();
+        Stream.of(3, 2, 2, 3, 7, 3, 5).skip(4).forEach(System.out::print);
+        System.out.println();
+        Stream.of(3, 2, 2, 3, 7, 3, 5).sorted().forEach(System.out::print);
+        System.out.println();
+        Stream.of(3, 2, 2, 3, 7, 3, 5).distinct().forEach(System.out::print);
+        System.out.println();
+        System.out.println(Stream.of(3, 2, 2, 3, 7, 3, 5).count());
+        System.out.println(Stream.of(3, 2, 2, 3, 7, 3, 5).collect(Collectors.toList()));
+    }
+
+
 
 }

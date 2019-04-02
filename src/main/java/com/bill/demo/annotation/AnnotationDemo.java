@@ -1,4 +1,4 @@
-package com.b.annotation;
+package com.bill.demo.annotation;
 
 @MyAnnotation1("this is annotation1")
 public class AnnotationDemo {
