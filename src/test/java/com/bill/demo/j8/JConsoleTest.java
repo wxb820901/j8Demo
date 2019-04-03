@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-//start current case and tehn run jconsole
+//start current case and then run jconsole, check different heap area changing
 public class JConsoleTest {
 
     static class OOMObject {
