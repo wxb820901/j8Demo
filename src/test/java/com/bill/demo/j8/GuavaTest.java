@@ -1,6 +1,8 @@
 package com.bill.demo.j8;
 
 import com.google.common.base.*;
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -18,6 +20,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -250,5 +253,33 @@ public class GuavaTest {
             }
         });
         System.out.println("value : " + resultVal); //value : begin code!
+    }
+
+
+
+    @Test
+    public void testOptional(){
+        Optional<Integer> possible = Optional.of(5);
+        System.out.println(possible.isPresent()); // returns true
+        System.out.println(possible.get()); // returns 5
+        Optional<Integer> possible2 = Optional.fromNullable(null);
+        System.out.println(possible2.isPresent()); // returns false
+        System.out.println(possible2.orNull()); // returns null
+        System.out.println(Optional.of(possible2).or(possible));// returns 5
+    }
+
+    @Test
+    public void testPreconditions(){
+        int i = 0, j = 1;
+        checkArgument(i >= 0, "Argument was %s but expected nonnegative", i);//IllegalArgumentException
+        checkArgument(i < j, "Expected i < j, but %s > %s", i, j);
+    }
+
+    @Test
+    public void testObject(){
+        System.out.println(Objects.equal("a", "a")); // returns true
+        System.out.println(Objects.equal(null, "a")); // returns false
+        System.out.println(Objects.equal("a", null)); // returns false
+        System.out.println(Objects.equal(null, null)); // returns true
     }
 }

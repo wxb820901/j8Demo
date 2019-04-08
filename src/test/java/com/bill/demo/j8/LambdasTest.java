@@ -1,7 +1,6 @@
 package com.bill.demo.j8;
 
-import com.bill.demo.j8.lambdas.People;
-import com.bill.demo.j8.lambdas.Tool;
+
 import org.junit.Test;
 
 import java.util.Optional;
@@ -14,24 +13,41 @@ import java.util.function.Supplier;
  * Created by WANGBIL on 7/25/2016.
  */
 public class LambdasTest {
-    @Test
-    public void test(){
-        Tool toolImpl = () -> System.out.println("todo");
 
+    interface People<T> {
+        void use(T tool);//default method is not function method
+        default void print(){
+            System.out.println("I am a vehicle!");
+        }
+    }
+    interface Tool {
+        void todo();
+    }
+    abstract class AbstractTool<T> implements Tool{
+        @Override
+        public void todo() {
+            System.out.println("todo");
+        }
+        public abstract void hook(T millsec);
+        //default abstract void testDefault(){} //==>error
+        //default only used by interface
+    }
+
+    @Test
+    public void testLambda(){
+        Tool toolImpl = () -> System.out.println("todo");
         People<Tool> peopleImpl = toolParameter -> {
             toolParameter.todo();
             System.out.println("use");
         };
-
         peopleImpl.use(toolImpl);
-
-
-//        //Error:(20, 45) java: incompatible types: com.bill.demo.j8.lambdas.AbstractTool is not a functional interface
+        System.out.println("====================================================");
+//        //lambda type must be interface
 //        AbstractTool<Integer> absToolImpl = (Integer millisecParameter) -> {
-//            todo();
+//                System.out.println(millisecParameter);
 //        };
-//
 //        peopleImpl.use(absToolImpl);
+
         System.out.println("====================================================");
         People<Tool> peopleImpl2 = toolParameter -> {
             toolParameter.todo();
@@ -58,7 +74,6 @@ public class LambdasTest {
         Integer value1 = null;
         Integer value2 = new Integer(10);
         Optional<Integer> a = Optional.ofNullable(value1);
-
         Optional<Integer> b = Optional.of(value2);
         System.out.println(Integer.sum(a.orElse(1), b.get()));
 
