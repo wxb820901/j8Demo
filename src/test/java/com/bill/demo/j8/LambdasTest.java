@@ -3,6 +3,7 @@ package com.bill.demo.j8;
 
 import org.junit.Test;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -68,7 +69,6 @@ public class LambdasTest {
         System.out.println("static use");
     }
 
-
     @Test
     public void testOptional(){
         Integer value1 = null;
@@ -79,10 +79,19 @@ public class LambdasTest {
 
     }
 
+    @Test
+    public void testObjects(){
+        Integer value1 = null;
+        Objects.requireNonNull(value1);
+        System.out.println(Objects.nonNull(value1));
+        System.out.println(Objects.isNull(value1));
+    }
+
     interface SupplierTestInterface{
         void setName(String name);
         String getName();
     }
+
     class SupplierTestImpl implements SupplierTestInterface{
         private String name;
 
@@ -100,6 +109,7 @@ public class LambdasTest {
             return this.name;
         }
     }
+
     @Test
     public void testSupplier(){
         //Supplier abstract a result of a function
