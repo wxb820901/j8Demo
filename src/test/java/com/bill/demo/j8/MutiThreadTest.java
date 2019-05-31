@@ -1,8 +1,6 @@
 package com.bill.demo.j8;
 
-import com.bill.demo.j8.mutiThread.DoTestTaskThreadPool;
 import com.bill.demo.j8.mutiThread.DoTestTasks;
-import com.bill.demo.j8.mutiThread.TestTask;
 import org.junit.Test;
 
 import java.util.concurrent.ExecutorService;
@@ -29,7 +27,7 @@ public class MutiThreadTest {
             }
             Thread a = new Thread() {
                 public void run() {
-                    new DoTestTasks().doTestTask(new TestTask());
+                    new DoTestTasks().doTestTask();
                 }
             };
             a.start();
@@ -42,14 +40,28 @@ public class MutiThreadTest {
     @Test
     public void testThreadPool(){
         final ExecutorService threadPool = Executors.newCachedThreadPool();//signleThreadPool will pending on first thread clean
-        threadPool.execute(() -> {
-            new DoTestTasks().cleanTaskList();
-        });
+
+        Thread cleanTaskListThread = new Thread(){
+            public void run(){
+                new DoTestTasks().cleanTaskList();
+            }
+        };
+//        cleanTaskListThread.setPriority(10);
+
+        threadPool.execute(cleanTaskListThread);
+
+
         for(int i = 0; i<100; i++){
-            threadPool.execute(() -> {
-                new DoTestTasks().doTestTask(new TestTask());
-            });
-            if(i%5==0){
+            Thread doTestTasksThread = new Thread(){
+                public void run(){
+                    new DoTestTasks().doTestTask();
+                }
+            };
+//            doTestTasksThread.setPriority(1);
+            threadPool.execute(doTestTasksThread);
+
+
+            if(i%5==0){//setPriority can make sense some point but not the same well done as sleep
                 try {
                     Thread.sleep(1000);//if not gap for add thread, the clear thread will not take the lock
                 } catch (InterruptedException e) {
@@ -60,7 +72,7 @@ public class MutiThreadTest {
 
         while(true){
             try {
-                if (!threadPool.awaitTermination(10, TimeUnit.SECONDS)) break;
+                if (!threadPool.awaitTermination(2, TimeUnit.SECONDS)) break;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
