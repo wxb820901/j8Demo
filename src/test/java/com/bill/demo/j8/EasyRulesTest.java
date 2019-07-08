@@ -13,7 +13,7 @@ import org.jeasy.rules.core.RulesEngineParameters;
 import org.jeasy.rules.support.UnitRuleGroup;
 import org.junit.Test;
 
-public class EasyRuleTest {
+public class EasyRulesTest {
     @Test
     public void test(){
         // create a rules engine
@@ -21,8 +21,8 @@ public class EasyRuleTest {
         RulesEngine fizzBuzzEngine = new DefaultRulesEngine(parameters);
 
         org.jeasy.rules.api.Rule zRule = new RuleBuilder()
-                .name("with0")
-                .description("if number with 0")
+//                .name("with0")
+//                .description("if number with 0")
                 .when(facts -> facts.get("number").toString().contains("0"))
                 .then(facts -> System.out.print("It's with 0,"))
                 .priority(0)
@@ -33,7 +33,7 @@ public class EasyRuleTest {
         rules.register(zRule);
         rules.register(new FizzRule());
         rules.register(new BuzzRule());
-        rules.register(new EasyRuleTest.FizzBuzzRule(new EasyRuleTest.FizzRule(), new EasyRuleTest.BuzzRule()));
+        rules.register(new EasyRulesTest.FizzBuzzRule(new EasyRulesTest.FizzRule(), new EasyRulesTest.BuzzRule()));
         rules.register(new NonFizzBuzzRule());
 
 
