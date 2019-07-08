@@ -24,7 +24,7 @@ public class RuleSetting {
                         String result = JsonPath.read(document, line).toString();
                         System.out.println("==>"+result);
                         return result;//filter implement, filter by line
-                    }, line
+                    }
                 )
             );
         }
@@ -35,7 +35,7 @@ public class RuleSetting {
         return facts -> facts.get(RULE_ID).equals(ruleId);
     }
 
-    private static Action generateAction(Filter filter,String commandLine){
+    private static Action generateAction(Filter filter){
         return facts -> {
             if(facts.get(RULE_FILTER_CONTENT)==null){
                 throw new Exception("content is null");
