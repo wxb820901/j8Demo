@@ -1,6 +1,7 @@
 package com.bill.demo.json.util.rules;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.bill.demo.json.util.rules.ODataOperation.*;
@@ -16,15 +17,11 @@ public enum ODataOperationExpression {
 
 
 
-    private List<ODataOperation> ODataOperations = new ArrayList<>();
+    private List<ODataOperation> operations = new ArrayList<>();
     private String expression;
     ODataOperationExpression(ODataOperation... ops){
-        for(ODataOperation ODataOperation : ops) {
-            ODataOperations.add(ODataOperation);
-        }
-
+        Arrays.asList(ops).stream().forEach(oDataOperation -> operations.add(oDataOperation));
     }
-
 
     public String getExpression(){
         return this.expression;
@@ -36,9 +33,9 @@ public enum ODataOperationExpression {
 
     public static ODataOperationExpression getOperationExpression(ODataOperation ODataOperation, String expression) throws Exception {
         if(ODataOperation != null){
-            for(ODataOperationExpression ODataOperationExpression : values()){
-                if(ODataOperationExpression.ODataOperations.contains(ODataOperation)){
-                    return ODataOperationExpression.withExression(expression.substring(1,expression.length()));
+            for(ODataOperationExpression operationExpression : values()){
+                if(operationExpression.operations.contains(ODataOperation)){
+                    return operationExpression.withExression(expression);
                 }
             }
         }

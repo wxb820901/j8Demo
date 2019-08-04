@@ -2,9 +2,8 @@ package com.bill.demo.json.util.rules;
 
 import com.jayway.jsonpath.JsonPath;
 
-import java.util.Map;
-
 import static com.bill.demo.json.util.JsonUtil.getJsonByMap;
+import static com.bill.demo.json.util.rules.ODataOperationResult.getODataOperationResult;
 
 /**
  * implement OData concrete operations
@@ -13,46 +12,38 @@ public enum ODataOperation {
     $filter{
         String apply(ODataOperationExpression expression, String json) throws Exception {
             String tempoJsonStr = getJsonByJsonPath(json, expression.getExpression());
-            setTempoResult(tempoJsonStr);//tempo result is filtered json
-            return tempoJsonStr;
+            ODataOperationResult result = getODataOperationResult(this);
+            return result.wrapResult(tempoJsonStr);
         }
     },
     $select{
         String apply(ODataOperationExpression expression, String json) throws Exception {
             String tempoJsonStr = getJsonByJsonPath(json, expression.getExpression());
-            setTempoResult(tempoJsonStr);//tempo result is filtered json
             return tempoJsonStr;
         }
     },
     $orderBy{
         String apply(ODataOperationExpression expression, String json) throws Exception {
-            setTempoResult(json);
             return json;
         }
     },
     $count{
         String apply(ODataOperationExpression expression, String json) throws Exception {
-            String count = null;
-            setTempoResult(count);//tempo result is $count value
-            return json;//add label $count=n
+            return json;
         }
     },
     $top{
         String apply(ODataOperationExpression expression, String json) throws Exception {
-            setTempoResult(json);
             return json;
         }
     },
     $skip{
         String apply(ODataOperationExpression expression, String json) throws Exception {
-            setTempoResult(json);
             return json;
         }
     },
     $value{
         String apply(ODataOperationExpression expression, String json) throws Exception {
-            String value = null;
-            setTempoResult(value);
             return json;
         }
     },
@@ -87,19 +78,7 @@ public enum ODataOperation {
      */
     abstract String apply(ODataOperationExpression expression, String json) throws Exception ;
 
-    private String tempoResult = null;
-
-    /**
-     * set tempo result of current apply
-     * @param tempoResult
-     */
-    void setTempoResult(String tempoResult){
-        this.tempoResult = tempoResult;
-    }
-    String getTempoResult(){
-        return this.tempoResult;
-    }
-    public static ODataOperation getOperation(String string) throws Exception {
+    public static ODataOperation getOperation(java.lang.String string) throws Exception {
         if(string != null){
             for(ODataOperation ODataOperation : values()){
                 if(string.contains(ODataOperation.name())){

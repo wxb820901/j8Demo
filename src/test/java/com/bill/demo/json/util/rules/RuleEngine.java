@@ -1,39 +1,28 @@
 package com.bill.demo.json.util.rules;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.bill.demo.json.util.rules.ODataOperationParser.parseOperations;
 
 public class RuleEngine {
 
-    private Map<ODataOperation, String> context = new HashMap<>();
+    private Map<ODataOperation, ODataOperationResult> context = new HashMap<>();
 
-    public Map<ODataOperation, String> getContext() {
+    public Map<ODataOperation, ODataOperationResult> getContext() {
         return context;
     }
 
-    public void action(String json, String filterString) throws Exception {
-
-        Map<ODataOperation, ODataOperationExpression> operations = parseOperations(filterString);
-
-
-        ODataOperation previousOperation = null;
-        String previousJsonResult = null;
-        for(ODataOperation operation: operations.keySet()){
-
-            if(previousOperation == null){//first step
-                previousOperation = operation;
-                previousJsonResult = operation.apply(operations.get(operation), json);
-                context.put(operation, previousJsonResult);
-
-            }else{
-                previousJsonResult = operation.apply(operations.get(operation), previousOperation.getTempoResult());
-                context.put(operation, previousJsonResult);
-                previousOperation = operation;
+    public String action(String json, String filterString) throws Exception {
+        Map<ODataOperation, List<ODataOperationExpression>> operations = parseOperations(filterString);
+        String tempJsonResult = json;
+        for(ODataOperation operation: operations.keySet()) {
+            for(ODataOperationExpression expression: operations.get(operation)) {
+                tempJsonResult = operation.apply(expression, tempJsonResult);
             }
-
-
         }
+        return tempJsonResult;
+
     }
 }

@@ -8,12 +8,14 @@ public class RuleEngineTest {
                 "[" +
                     "{"+
                     "\"id\":\"121212\"," +
+                    "\"type\":\"ceg\"," +
                     "\"name\":\"xxyy\"," +
                     "\"desc\":\"example1\"" +
                     "},"+
 
                     "{"+
                     "\"id\":\"212121\"," +
+                    "\"type\":\"rs\"," +
                     "\"name\":\"yyxx\"," +
                     "\"desc\":\"example2\"" +
                     "}" +
@@ -24,24 +26,24 @@ public class RuleEngineTest {
     public void testFilter() throws Exception {
         RuleEngine engine = new RuleEngine();
         String queryString = "$filter=$.data[?(@.name=='xxyy')]";
-        engine.action(json, queryString);
-        System.out.println(engine.getContext());
+        String result = engine.action(json, queryString);
+        System.out.println(result);
     }
 
     @Test
     public void testSelect() throws Exception {
         RuleEngine engine = new RuleEngine();
         String queryString = "$select=$.data[*]['name','desc']";
-        engine.action(json, queryString);
-        System.out.println(engine.getContext());
+        String result = engine.action(json, queryString);
+        System.out.println(result);
     }
 
     @Test
     public void testFilterAndSelect() throws Exception {
         RuleEngine engine = new RuleEngine();
         String queryString = "$filter=$.data[?(@.name=='xxyy')]&$select=$.data[*]['name','desc']";
-        engine.action(json, queryString);
-        System.out.println(engine.getContext());
+        String result = engine.action(json, queryString);
+        System.out.println(result);
     }
 
 

@@ -1,6 +1,8 @@
 package com.bill.demo.json.util.rules;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.bill.demo.json.util.rules.ODataOperation.getOperation;
@@ -9,19 +11,25 @@ import static com.bill.demo.json.util.rules.ODataOperationExpression.getOperatio
 public class ODataOperationParser {
 
     public static final String AND = "&";
-    public static Map<ODataOperation, ODataOperationExpression> parseOperations(String operationString) throws Exception {
+    public static Map<ODataOperation, List<ODataOperationExpression>> parseOperations(String operationString) throws Exception {
         String[] operationStrs = operationString.split(AND);
-        Map<ODataOperation, ODataOperationExpression> operations = new HashMap<>();
+        Map<ODataOperation, List<ODataOperationExpression>> operations = new HashMap<>();
         for(String operationStr: operationStrs){
             ODataOperation oDataOperation = getOperation(operationStr);
 
             if(oDataOperation != null){
                 if(operations.get(oDataOperation) != null){
-                    throw new Exception("duplicated ODataOperation");
+
                 }
-                operations.put(oDataOperation, getOperationExpression(
+                operations.put(
                         oDataOperation,
-                        operationStr.replace(oDataOperation.name(),"")));
+                        Arrays.asList(
+                            getOperationExpression(
+                                oDataOperation,
+                                operationStr.replace(oDataOperation.name(),"").substring(1)
+                            )
+                        )
+                );
             }
         }
         return operations;
