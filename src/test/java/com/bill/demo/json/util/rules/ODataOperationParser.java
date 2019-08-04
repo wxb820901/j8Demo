@@ -33,13 +33,14 @@ public class ODataOperationParser {
         String[] operationStrs = operationString.split(AND);
         Map<ODataOperation, List<ODataOperationExpression>> operations = new HashMap<>();
         for(String operationStr: operationStrs){
-            ODataOperation oDataOperation = getOperation(operationStr);
+            ODataOperation oDataOperation = getOperation(operationStr).withPrefix(prefix);
             if(oDataOperation != null){
-                ODataOperationExpression expression = getOperationExpression(
-                        oDataOperation,
-                        prefix,
-                        operationStr.replace(oDataOperation.name(),"").substring(1)
-                );
+                ODataOperationExpression expression = getOperationExpression(oDataOperation)
+                        .withPrefix(prefix)
+                        .withExression(
+                                "".equals(operationStr.replace(oDataOperation.name(),"").trim())
+                                ? ""
+                                : operationStr.replace(oDataOperation.name(),"").substring(1));
                 if(operations.get(oDataOperation) != null){
                     operations.get(oDataOperation).add(expression);
                 }else{
@@ -51,13 +52,40 @@ public class ODataOperationParser {
     }
 
     /**
-     * prepare json for operation
+     * make sure the input of operation is like
+     * {
+     *     "prefix1":[
+     *          {
+     *              "label1":"sdsd",
+     *              "label2":"dfdf",
+     *              "label3":"fgfg"
+     *          },
+     *          {
+     *              "label1":"sdsd",
+     *              "label2":"dfdf",
+     *              "label3":"fgfg"
+     *          }
+     *     ],
+     *     "prefix2":[
+     *           {
+     *               "label1":"sdsd",
+     *               "label2":"dfdf",
+     *               "label3":"fgfg"
+     *           },
+     *           {
+     *               "label1":"sdsd",
+     *               "label2":"dfdf",
+     *               "label3":"fgfg"
+     *           }
+     *     ]
+     *
+     * }
      *
      * @param json
      * @return
      */
-    public static String parseOperationsInput(String json){
-        return json;
+    public static String parseOperationsInput(String json) throws Exception {
+        throw new Exception("not supported operation $expand");
     }
 
 

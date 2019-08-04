@@ -18,22 +18,24 @@ public enum ODataOperationExpression {
 
 
     private List<ODataOperation> operations = new ArrayList<>();
-    private String expression;
-    private String prefix;
+
+
 
     ODataOperationExpression(ODataOperation... ops){
         Arrays.asList(ops).stream().forEach(oDataOperation -> operations.add(oDataOperation));
     }
 
-
-    ODataOperationExpression withExression(String expression){
+    private String expression;
+    public ODataOperationExpression withExression(String expression){
         this.expression = expression;
         return this;
     }
     public String getExpression(){
         return this.expression;
     }
-    ODataOperationExpression withPrefix(String prefix){
+
+    private String prefix;
+    public ODataOperationExpression withPrefix(String prefix){
         this.prefix = prefix;
         return this;
     }
@@ -41,11 +43,12 @@ public enum ODataOperationExpression {
         return this.prefix;
     }
 
-    public static ODataOperationExpression getOperationExpression(ODataOperation ODataOperation, String prefix, String expression) throws Exception {
+
+    public static ODataOperationExpression getOperationExpression(ODataOperation ODataOperation) throws Exception {
         if(ODataOperation != null){
             for(ODataOperationExpression operationExpression : values()){
                 if(operationExpression.operations.contains(ODataOperation)){
-                    return operationExpression.withPrefix(prefix).withExression(expression);
+                    return operationExpression;
                 }
             }
         }

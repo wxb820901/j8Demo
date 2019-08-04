@@ -1,18 +1,17 @@
 package com.bill.demo.json.util;
 
+import com.bill.demo.json.util.rules.ODataOperationExpression;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class JsonUtil {
-    private void prettyPrint(String uglyJSONString) {
+    public static void prettyPrint(String uglyJSONString) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(uglyJSONString);
@@ -23,7 +22,7 @@ public class JsonUtil {
     /**
      * Facade function to convert a json String to a map (of json path mapping to value)
      */
-    public Map<String, String> convertJsonToMap(String json){
+    public static Map<String, String> convertJsonToMap(String json){
         Map<String, String> jsonPathsMapingValue = new HashMap<>();
         Object jsonObj = getMapByJson(json);
         getJsonPathMapValue(JSON_PATH_PREFIX, jsonObj, jsonPathsMapingValue);
@@ -32,14 +31,209 @@ public class JsonUtil {
     /**
      * Facade function to convert a map (of json path mapping and value) to a json String
      */
-    public String convertMapToJson(Map<String, String>  json){
+    public static String convertMapToJson(Map<String, String>  json){
         Object jsonObj = getJsonMap(json);
         return getJsonByMap(jsonObj);
     }
+    /**
+     * assume ODataOperationExpression.getExpression() like 'label1, label2'
+     *
+     * @param originjsonPaths
+     * @param filterOrSelect
+     * @return
+     */
+    public static Map<String, String> getSelected(Map<String, String> originjsonPaths, ODataOperationExpression filterOrSelect){
+        String[] wantedKeys = filterOrSelect.getExpression().split(",");
+        return originjsonPaths
+                .entrySet().stream().filter(
+                        entry -> {
+                            for(String wantedKey : wantedKeys){
+                                if(entry.getKey().indexOf(filterOrSelect.getPrefix())>-1
+                                        && entry.getKey().indexOf(wantedKey.trim())>-1){
+                                    return true;
+                                }
+                            }
+                            return false;
+                        })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * assume ODataOperationExpression.getExpression() like ""
+     *
+     * @param originjsonPaths
+     * @param countExpression
+     * @return
+     */
+    public static Map<String, String> getCount(Map<String, String> originjsonPaths, ODataOperationExpression countExpression){
+        Map<String, String> result = new HashMap();
+        String prefixSorted = countExpression.getPrefix();
+        Set<String> prefixs = new HashSet();
+        for(String key : originjsonPaths.keySet()){
+            if (key.indexOf(prefixSorted) > -1) {
+                String value = originjsonPaths.get(key);
+                result.put(key, value);
+                prefixs.add(key.split("\\.")[1]);
+            }
+        }
+        result.put("$.count", new Integer(prefixs.size()).toString());
+        return result;
+    }
+
+    /**
+     * assume ODataOperationExpression.getExpression() like "n"
+     *
+     * @param originjsonPaths
+     * @param countExpression
+     * @return
+     */
+    public static Map<String, String> getTop(Map<String, String> originjsonPaths, ODataOperationExpression countExpression){
+        Map<String, String> result = new HashMap();
+        String prefixSorted = countExpression.getPrefix();
+        int top = Integer.parseInt(countExpression.getExpression().trim());
+
+        //collect all prefix[*]
+        Set<String> prefixs = new HashSet();
+        for(String key : originjsonPaths.keySet()){
+            if (key.indexOf(prefixSorted) > -1) {
+                prefixs.add(key.split("\\.")[1]);
+            }
+        }
+        //get top n prefix[*]
+        Set<String> topPrefixs = new HashSet();
+        Iterator<String> iterator = prefixs.iterator();
+        int index = 0;
+        while(iterator.hasNext() && (index++) < top){
+            topPrefixs.add(iterator.next());
+        }
+
+        //get json by top n prefix[*]
+        for(String keyTop : topPrefixs){
+            for(String key : originjsonPaths.keySet()){
+                if (key.indexOf(keyTop) > -1) {
+                    String value = originjsonPaths.get(key);
+                    result.put(key, value);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * assume ODataOperationExpression.getExpression() like "n"
+     *
+     * @param originjsonPaths
+     * @param countExpression
+     * @return
+     */
+    public static Map<String, String> getSkip(Map<String, String> originjsonPaths, ODataOperationExpression countExpression){
+        Map<String, String> result = new HashMap();
+        String prefixSorted = countExpression.getPrefix();
+        int skip = Integer.parseInt(countExpression.getExpression().trim());
+
+        //collect all prefix[*]
+        Set<String> prefixs = new HashSet();
+        for(String key : originjsonPaths.keySet()){
+            if (key.indexOf(prefixSorted) > -1) {
+                prefixs.add(key.split("\\.")[1]);
+            }
+        }
+        //get top n prefix[*]
+        Set<String> skipedPrefixs = new HashSet();
+        Iterator<String> iterator = prefixs.iterator();
+        int index = 0;
+        while(iterator.hasNext()){
+            String prefix = iterator.next();
+            if(++index>skip) {
+                skipedPrefixs.add(prefix);
+            }
+
+        }
+
+        //get json by top n prefix[*]
+        for(String keyTop : skipedPrefixs){
+            for(String key : originjsonPaths.keySet()){
+                if (key.indexOf(keyTop) > -1) {
+                    String value = originjsonPaths.get(key);
+                    result.put(key, value);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * assume ODataOperationExpression.getExpression() like 'label1 desc/asc' default is asc
+     * assume label1, label2 is sub element of prefix
+     *
+     * @param originjsonPaths
+     * @param filterOrSelect
+     * @return
+     */
+    public static Map<String, String> getOrdered(Map<String, String> originjsonPaths, ODataOperationExpression filterOrSelect) throws Exception {
+        String[] wantedStrKeys = filterOrSelect.getExpression().split(",");
+        if(wantedStrKeys.length != 1){
+            throw new Exception("not supported multi orderby - "+filterOrSelect.getExpression());
+        }
+        Map<String, String> keyToAscOrDesc = new HashMap();
+        Arrays.asList(wantedStrKeys)
+                .stream().forEach(key ->
+                {
+                    if(key.indexOf("desc")>-1){
+                        keyToAscOrDesc.put(key.trim(), "desc");
+                    }else{
+                        keyToAscOrDesc.put(key.trim(), "asc");
+                    }
+
+                }
+        );
 
 
 
+        Map<String, String> treeMap;
+        //select label and sort by value
+        String orderBylable = (String) new ArrayList(keyToAscOrDesc.keySet()).get(0);
+        if("asc".equals(keyToAscOrDesc.get(orderBylable))){
+            treeMap = new TreeMap((Comparator<String>) (o1, o2) -> o2.compareTo(o1));
+        }else{
+            treeMap = new TreeMap((Comparator<String>) (o1, o2) -> - o2.compareTo(o1));
+        }
+        treeMap.putAll(
+                originjsonPaths
+                        .entrySet().stream().filter(
+                        entry -> {
+                            for(String wantedKey : keyToAscOrDesc.keySet()){
+                                if(entry.getKey().indexOf(filterOrSelect.getPrefix())>-1
+                                        && entry.getKey().indexOf(wantedKey.trim())>-1){
+                                    return true;
+                                }
+                            }
+                            return false;
+                        })
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
 
+        );
+
+        //build result by sorted prefix
+        Map<String, String> result = new HashMap();
+        int reIndex = 0;
+
+        for(String keySorted: treeMap.keySet()) {
+            String prefixSorted = keySorted.substring(2, keySorted.indexOf(orderBylable) - 1);
+            for(String key : originjsonPaths.keySet()){
+                if (key.indexOf(prefixSorted) > -1) {
+                    String value = originjsonPaths.get(key);
+                    result.put(key.replace(prefixSorted, filterOrSelect.getPrefix() + "[" + reIndex + "]"), value);
+                }
+            }
+            reIndex++;
+        }
+
+
+        return result;
+    }
 
     /**
      * get a Map of json structure from json
@@ -118,7 +312,7 @@ public class JsonUtil {
             Object jsonMapByOneJsonPath = generateMapByJsonPath(key, jsonPathsMapValue.get(key));
             mergeMap(merged, (Map) jsonMapByOneJsonPath);
         }
-        return merged.get(JSON_PATH_PREFIX);
+        return merged;
     }
 
     /**
@@ -128,19 +322,10 @@ public class JsonUtil {
      * @return
      */
     public static String getJsonByMap(Object jsonMap) {
-        JSONObject json;
-        if(jsonMap instanceof Map) {
-            json = new JSONObject(jsonMap);
-        }else if(jsonMap instanceof List){
-            Map<String, Object> outterMap = new HashMap<>();
-            outterMap.put("data", jsonMap);
-            json = new JSONObject(outterMap);
-        }else{
-            Map<String, Object> outterMap = new HashMap<>();
-            json = new JSONObject(outterMap);
-        }
-
-        return json.toString();
+        Map<String, Object> outterMap = new HashMap<>();
+        outterMap.put("data", jsonMap);
+        JSONObject json = new JSONObject(outterMap);
+        return json.get("data").toString();
     }
 
 
@@ -240,7 +425,7 @@ public class JsonUtil {
             to = from;
         }
 
-        System.out.println("DEBUG:to======>" + to);
+//        System.out.println("DEBUG:to======>" + to);
 
     }
 }

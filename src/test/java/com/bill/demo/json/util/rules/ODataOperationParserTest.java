@@ -20,8 +20,9 @@ public class ODataOperationParserTest {
         Assert.assertEquals("filterExpresion",oDataOperationODataOperationExpressionMap.get(ODataOperation.$filter).get(0).name());
         Assert.assertEquals("$.data[?(@.name=='xxyy')]",
                 oDataOperationODataOperationExpressionMap.get(ODataOperation.$filter).get(0).getExpression());
-        Assert.assertEquals("type1",
-                oDataOperationODataOperationExpressionMap.get(ODataOperation.$filter).get(0).getPrefix());
+        oDataOperationODataOperationExpressionMap
+                .keySet().stream().forEach(
+                        oDataOperation -> Assert.assertEquals("type1", oDataOperation.getPrefix()));
 
     }
 
@@ -37,13 +38,14 @@ public class ODataOperationParserTest {
 
         Assert.assertEquals("$.data[?(@.name=='xxyy')]",
                 oDataOperationODataOperationExpressionMap.get(ODataOperation.$filter).get(0).getExpression());
-        Assert.assertEquals("type1",
-                oDataOperationODataOperationExpressionMap.get(ODataOperation.$filter).get(0).getPrefix());
+
 
         Assert.assertEquals("$.data[*]['name','desc']",
                 oDataOperationODataOperationExpressionMap.get(ODataOperation.$select).get(0).getExpression());
-        Assert.assertEquals("type1",
-                oDataOperationODataOperationExpressionMap.get(ODataOperation.$select).get(0).getPrefix());
+        oDataOperationODataOperationExpressionMap
+                .keySet().stream().forEach(
+                        oDataOperation -> Assert.assertEquals("type1", oDataOperation.getPrefix()));
+
 
     }
 }

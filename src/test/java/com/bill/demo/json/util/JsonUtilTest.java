@@ -1,5 +1,7 @@
 package com.bill.demo.json.util;
 
+import com.bill.demo.json.util.rules.ODataOperation;
+import com.bill.demo.json.util.rules.ODataOperationExpression;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -13,9 +15,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.bill.demo.json.util.JsonUtil.*;
 import static com.jayway.jsonpath.internal.JsonFormatter.prettyPrint;
+import static java.util.Map.*;
 
 public class JsonUtilTest {
     @Test
@@ -118,19 +123,107 @@ public class JsonUtilTest {
     }
 
 
-//    private Set<String> getWantedJsonPath(Set<String> originjsonPaths, Set<String> jsonPaths) {
-//        return originjsonPaths.stream().filter(jsonPath -> {
-//            for (String filterJsonPath : jsonPaths) {
-//                if (jsonPath.indexOf(filterJsonPath) > -1) {//regex
-//                    return true;
-//                }
-//            }
-//            return false;
-//        }).collect(Collectors.toCollection(HashSet::new));
-//    }
+
+
+
+    public static final String inputJson =
+            "{\n" +
+                    "    \"prefix1\":[\n" +
+                    "         {\n" +
+                    "             \"label1\":\"5\",\n" +
+                    "             \"label2\":\"0\",\n" +
+                    "             \"label3\":\"fgfg\"\n" +
+                    "         },\n" +
+                    "         {\n" +
+                    "             \"label1\":\"2\",\n" +
+                    "             \"label2\":\"9\",\n" +
+                    "             \"label3\":\"fgfg\"\n" +
+                    "         }\n" +
+                    "    ],\n" +
+                    "    \"prefix2\":[\n" +
+                    "          {\n" +
+                    "              \"label1\":\"2\",\n" +
+                    "              \"label2\":\"100\",\n" +
+                    "              \"label3\":\"fgfg\"\n" +
+                    "          },\n" +
+                    "          {\n" +
+                    "              \"label1\":\"5\",\n" +
+                    "              \"label2\":\"101\",\n" +
+                    "              \"label3\":\"fgfg\"\n" +
+                    "          }\n" +
+                    "    ]\n" +
+                    "}";
+    @Test
+    public void testjsonFilterAndSelect() {
+        Map<String, String> obj =  convertJsonToMap(inputJson);
+        obj.entrySet().stream().forEach(System.out::println);
+
+
+        String json = convertMapToJson(obj);
+        prettyPrint(json);
+    }
+
+
+    /**
+     * assume ODataOperationExpression.getExpression() like 'label1 eq sdsd and label2 eq 1234 or  label3 = as34'
+     *
+     * @param originjsonPaths
+     * @param filterOrSelect
+     * @return
+     */
+    public static Map<String, String> getFiltered(Map<String, String> originjsonPaths, ODataOperationExpression filterOrSelect){
+        Set wantedPath = originjsonPaths
+                .keySet().stream().filter(
+                        key -> key.indexOf(filterOrSelect.getExpression())>-1)
+                .collect(Collectors.toCollection(HashSet::new));
+        Map<String, String> wantedPathAndValue = new HashMap<>();
+
+        return wantedPathAndValue;
+
+    }
 
 
 
 
+    @Test
+    public void testGetSelect(){
+        ODataOperationExpression expression = ODataOperationExpression.listExpression.withExression("label1, label2");
+        Map<String, String> obj =  convertJsonToMap(inputJson);
+        obj.entrySet().stream().forEach(System.out::println);
+        System.out.println("============================================================================");
+        obj = getSelected(obj, expression);
+        obj.entrySet().stream().forEach(System.out::println);
+        String json = convertMapToJson(obj);
+        prettyPrint(json);
+    }
+
+
+    @Test
+    public void testOrdered() throws Exception {
+        ODataOperationExpression expression = ODataOperationExpression.listExpression.withExression("label1").withPrefix("prefix1");
+        Map<String, String> obj =  convertJsonToMap(inputJson);
+        obj.entrySet().stream().forEach(System.out::println);
+        System.out.println("============================================================================");
+        obj = getOrdered(obj, expression);
+        obj.entrySet().stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testCount() throws Exception {
+        ODataOperationExpression expression = ODataOperationExpression.listExpression.withExression("").withPrefix("prefix1");
+        Map<String, String> obj =  convertJsonToMap(inputJson);
+        obj.entrySet().stream().forEach(System.out::println);
+        System.out.println("============================================================================");
+        obj = getCount(obj, expression);
+        obj.entrySet().stream().forEach(System.out::println);
+    }
+
+
+
+    @Test
+    public void testjsonRegex() {
+
+        System.out.println(Pattern.compile("$.prefix1[*\\d].label3").matcher("$.prefix1[1].label3").find());
+    }
 
 }
