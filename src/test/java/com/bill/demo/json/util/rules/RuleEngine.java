@@ -14,8 +14,8 @@ public class RuleEngine {
         return context;
     }
 
-    public String action(String json, String filterString) throws Exception {
-        Map<ODataOperation, List<ODataOperationExpression>> operations = parseOperations(filterString);
+    public String action(String json, String queryString) throws Exception {
+        Map<ODataOperation, List<ODataOperationExpression>> operations = parseOperations(queryString);
         String tempJsonResult = json;
         for(ODataOperation operation: operations.keySet()) {
             for(ODataOperationExpression expression: operations.get(operation)) {

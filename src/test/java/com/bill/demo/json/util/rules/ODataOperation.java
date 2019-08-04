@@ -19,7 +19,8 @@ public enum ODataOperation {
     $select{
         String apply(ODataOperationExpression expression, String json) throws Exception {
             String tempoJsonStr = getJsonByJsonPath(json, expression.getExpression());
-            return tempoJsonStr;
+            ODataOperationResult result = getODataOperationResult(this);
+            return result.wrapResult(tempoJsonStr);
         }
     },
     $orderBy{
