@@ -8,14 +8,14 @@ public class RuleEngineTest {
                 "[" +
                     "{"+
                     "\"id\":\"121212\"," +
-                    "\"type\":\"ceg\"," +
+                    "\"type\":\"type1\"," +
                     "\"name\":\"xxyy\"," +
                     "\"desc\":\"example1\"" +
                     "},"+
 
                     "{"+
                     "\"id\":\"212121\"," +
-                    "\"type\":\"rs\"," +
+                    "\"type\":\"type2\"," +
                     "\"name\":\"yyxx\"," +
                     "\"desc\":\"example2\"" +
                     "}" +
