@@ -25,7 +25,7 @@ public class RuleEngineTest {
     @Test
     public void testFilter() throws Exception {
         RuleEngine engine = new RuleEngine();
-        String queryString = "$filter=$.data[?(@.name=='xxyy')]";
+        String queryString = "data1?$filter=$.data[?(@.name=='xxyy')]";
         String result = engine.action(json, queryString);
         System.out.println(result);
     }
@@ -33,7 +33,7 @@ public class RuleEngineTest {
     @Test
     public void testSelect() throws Exception {
         RuleEngine engine = new RuleEngine();
-        String queryString = "$select=$.data[*]['name','desc']";
+        String queryString = "data1?$select=$.data[*]['name','desc']";
         String result = engine.action(json, queryString);
         System.out.println(result);
     }
@@ -41,7 +41,7 @@ public class RuleEngineTest {
     @Test
     public void testFilterAndSelect() throws Exception {
         RuleEngine engine = new RuleEngine();
-        String queryString = "$filter=$.data[?(@.name=='xxyy')]&$select=$.data[*]['name','desc']";
+        String queryString = "data1?$filter=$.data[?(@.name=='xxyy')]&$select=$.data[*]['name','desc']";
         String result = engine.action(json, queryString);
         System.out.println(result);
     }
