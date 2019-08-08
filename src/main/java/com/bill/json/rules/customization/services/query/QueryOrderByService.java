@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.bill.json.rules.customization.util.JsonUtil.getListByPrefix;
-
+import static com.bill.json.rules.customization.util.JsonUtil.replaceArrayIndexWithStar;
 
 /**
  * query function for $order
@@ -22,7 +22,7 @@ import static com.bill.json.rules.customization.util.JsonUtil.getListByPrefix;
 public class QueryOrderByService implements Rule {
     private static final Logger logger = LogManager.getLogger(QueryOrderByService.class);
     /**
-     * assume ODataQueryExpression.getExpression() like 'label1 desc/asc' default is asc
+     * assume ODataQueryExpression.getExpressions() like 'label1 desc/asc' default is asc
      * assume label1, label2 is sub element of prefix
      *
      * @param originjsonPaths
@@ -32,59 +32,58 @@ public class QueryOrderByService implements Rule {
     @Override
     public Map<String, String> apply(
             Map<String, String> originjsonPaths, ODataQueryExpression orderByExpression) throws Exception {
+        if (orderByExpression.getExpressions().size() != 1) {
+            throw new Exception("not supported multi orderby - " + orderByExpression.getExpressions());
+        }
         logger.info("getOrdered " + orderByExpression);
-        originjsonPaths = getListByPrefix(originjsonPaths, orderByExpression);
+        originjsonPaths = getListByPrefix(originjsonPaths, orderByExpression.getPrefix());
         logger.info("getOrdered originjsonPaths=" + originjsonPaths);
 
-        String[] wantedStrKeys = orderByExpression.getExpression().split(",");
+        String[] wantedStrKeys = orderByExpression.getExpressions().get(0).split(",");
         if (wantedStrKeys.length != 1) {
-            throw new Exception("not supported multi orderby - " + orderByExpression.getExpression());
+            throw new Exception("not supported multi orderby - " + orderByExpression.getExpressions());
         }
-        Map<String, String> keyToAscOrDesc = new HashMap();
+        Map<String, String> keyToAscOrDesc = new LinkedHashMap<>();
         Arrays.asList(wantedStrKeys)
                 .stream().forEach(key ->
                 {
                     if (key.indexOf("desc") > -1) {
-                        keyToAscOrDesc.put(key.trim(), "desc");
+                        keyToAscOrDesc.put(key.replace("desc","").trim(), "desc");
                     } else {
-                        keyToAscOrDesc.put(key.trim(), "asc");
+                        keyToAscOrDesc.put(key.replace("asc","").trim(), "asc");
                     }
 
                 }
         );
 
-        Map<String, String> treeMap;
-        //select label and sort by value
+        List<Map.Entry<String, String>> wantedEntrys = originjsonPaths
+                .entrySet().stream().filter(
+                entry -> {
+                    for (String wantedKey : keyToAscOrDesc.keySet()) {
+                        if (entry.getKey().startsWith("$." + orderByExpression.getPrefix())
+                                && replaceArrayIndexWithStar(wantedKey.trim(), entry.getKey()).indexOf(wantedKey.trim()) > -1) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }).collect(Collectors.toList());
+        wantedEntrys.sort(Map.Entry.comparingByValue());
         String orderBylable = (String) new ArrayList(keyToAscOrDesc.keySet()).get(0);
-        if ("asc".equals(keyToAscOrDesc.get(orderBylable))) {
-            treeMap = new TreeMap((Comparator<String>) (o1, o2) -> o2.compareTo(o1));
-        } else {
-            treeMap = new TreeMap((Comparator<String>) (o1, o2) -> -o2.compareTo(o1));
+        if ("desc".equals(keyToAscOrDesc.get(orderBylable))) {
+            Collections.reverse(wantedEntrys);
         }
-        treeMap.putAll(
-                originjsonPaths
-                        .entrySet().stream().filter(
-                        entry -> {
-                            for (String wantedKey : keyToAscOrDesc.keySet()) {
-                                if (entry.getKey().indexOf(orderByExpression.getPrefix()) > -1
-                                        && entry.getKey().indexOf(wantedKey.trim()) > -1) {
-                                    return true;
-                                }
-                            }
-                            return false;
-                        })
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-        );
+
+        logger.info("getOrdered treeMap="+wantedEntrys);
         /**
-         *  here we got all entry with the order by label
+         *  here we got all entry ordered by label
          *  and with consequence by value
          *
          *  build result by sorted prefix[n] and reindex
          */
-        Map<String, String> result = new HashMap();
+        Map<String, String> result = new LinkedHashMap();
         int reIndex = 0;
-        for (String keySorted : treeMap.keySet()) {
-            String prefixSorted = keySorted.substring(2, keySorted.indexOf(orderBylable) - 1);
+        for (Map.Entry entrySortedbyValue : wantedEntrys) {
+            String prefixSorted = entrySortedbyValue.getKey().toString().substring(2, entrySortedbyValue.getKey().toString().indexOf(orderBylable) - 1);
             for (String key : originjsonPaths.keySet()) {
                 if (key.indexOf(prefixSorted) > -1) {
                     String value = originjsonPaths.get(key);

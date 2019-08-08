@@ -22,6 +22,16 @@ public class RuleEngineTest {
                     "             \"label1\":\"1\",\n" +
                     "             \"label2\":\"prefix1[1].label2.value\",\n" +
                     "             \"label3\":\"fgfg\"\n" +
+                    "         },\n" +
+                    "         {\n" +
+                    "             \"label1\":\"3\",\n" +
+                    "             \"label2\":\"cccc\",\n" +
+                    "             \"label3\":\"fgfg\"\n" +
+                    "         },\n" +
+                    "         {\n" +
+                    "             \"label1\":\"4\",\n" +
+                    "             \"label2\":\"ccca\",\n" +
+                    "             \"label3\":\"fgfg\"\n" +
                     "         }\n" +
                     "    ],\n" +
                     "    \"rs\":[\n" +
@@ -40,7 +50,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterEq() throws Exception {
-        logger.info("testFilterEq");
+        System.out.println("testFilterEq");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label1 eq 1&$count";
         String result = engine.action(inputJson, queryString);
@@ -49,7 +59,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterGe() throws Exception {
-        logger.info("testFilterGe");
+        System.out.println("testFilterGe");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label1 ge 1&$count";
         String result = engine.action(inputJson, queryString);
@@ -58,7 +68,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterGt() throws Exception {
-        logger.info("testFilterGt");
+        System.out.println("testFilterGt");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label1 gt 1&$count";
         String result = engine.action(inputJson, queryString);
@@ -67,7 +77,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterLe() throws Exception {
-        logger.info("testFilterLe");
+        System.out.println("testFilterLe");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label1 le 2&$count";
         String result = engine.action(inputJson, queryString);
@@ -76,7 +86,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterlt() throws Exception {
-        logger.info("testFilterlt");
+        System.out.println("testFilterlt");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label1 lt 2&$count";
         String result = engine.action(inputJson, queryString);
@@ -85,7 +95,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterContains() throws Exception {
-        logger.info("testFilterContains");
+        System.out.println("testFilterContains");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label3 contains gf&$count";
         String result = engine.action(inputJson, queryString);
@@ -94,7 +104,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterStartWith() throws Exception {
-        logger.info("testFilterStartWith");
+        System.out.println("testFilterStartWith");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label3 startWith as&$count";
         String result = engine.action(inputJson, queryString);
@@ -103,7 +113,7 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterEndWith() throws Exception {
-        logger.info("testFilterEndWith");
+        System.out.println("testFilterEndWith");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=label3 endWith fg&$count";
         String result = engine.action(inputJson, queryString);
@@ -112,15 +122,16 @@ public class RuleEngineTest {
 
     @Test
     public void testFilterisExistTrue() throws Exception {
-        logger.info("testFilterisExistTrue");
+        System.out.println("testFilterisExistTrue");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=isExist label1,label2&$count";
         String result = engine.action(inputJson, queryString);
         JsonUtil.prettyPrint(result);
     }
+
     @Test
     public void testFilterisExistFalse() throws Exception {
-        logger.info("testFilterisExistFalse");
+        System.out.println("testFilterisExistFalse");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$filter=isExist label4&$count";
         String result = engine.action(inputJson, queryString);
@@ -128,8 +139,17 @@ public class RuleEngineTest {
     }
 
     @Test
+    public void testFilterOrFilter() throws Exception {
+        System.out.println("testFilterOrFilter");
+        RuleEngine engine = new RuleEngine();
+        String queryString = "ceg?$filter=label1 eq 1 or label1 eq 1&$count";
+        String result = engine.action(inputJson, queryString);
+        JsonUtil.prettyPrint(result);
+    }
+
+    @Test
     public void testSelect() throws Exception {
-        logger.info("testSelect");
+        System.out.println("testSelect");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$select=label2, label3&$count";
         String result = engine.action(inputJson, queryString);
@@ -138,7 +158,7 @@ public class RuleEngineTest {
 
     @Test
     public void testCount() throws Exception {
-        logger.info("testCount");
+        System.out.println("testCount");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$count";
         String result = engine.action(inputJson, queryString);
@@ -147,16 +167,16 @@ public class RuleEngineTest {
 
     @Test
     public void testOrderBy() throws Exception {
-        logger.info("testOrderBy");
+        System.out.println("testOrderBy");
         RuleEngine engine = new RuleEngine();
-        String queryString = "ceg?$orderBy=label1";
+        String queryString = "ceg?$orderBy=label1 desc";
         String result = engine.action(inputJson, queryString);
         JsonUtil.prettyPrint(result);
     }
 
     @Test
     public void testOrderByAndTop() throws Exception {
-        logger.info("testOrderByAndTop");
+        System.out.println("testOrderByAndTop");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$orderBy=label1&$top=1&$count";
         String result = engine.action(inputJson, queryString);
@@ -165,9 +185,29 @@ public class RuleEngineTest {
 
     @Test
     public void testOrderByAndSkip() throws Exception {
-        logger.info("testOrderByAndSkip");
+        System.out.println("testOrderByAndSkip");
         RuleEngine engine = new RuleEngine();
         String queryString = "ceg?$orderBy=label1&$skip=1&$count";
+        String result = engine.action(inputJson, queryString);
+        JsonUtil.prettyPrint(result);
+    }
+
+    @Test
+    public void testComplicatedQuery() throws Exception {
+        System.out.println("testComplicatedQuery");
+        RuleEngine engine = new RuleEngine();
+        String queryString = "ceg?" +
+                "$orderBy=label1" +
+                "&$skip=0" +
+                "&$top=4" +
+                "&$select=label3,label2,label1" +
+                "&$filter=label1 eq 1 or label1 eq 2 or label1 eq3 or label1 eq 4" +
+                "&$filter=label3 eq fgfg" +
+                "&$filter=isExist label2" +
+
+                "&$count"
+                ;
+
         String result = engine.action(inputJson, queryString);
         JsonUtil.prettyPrint(result);
     }

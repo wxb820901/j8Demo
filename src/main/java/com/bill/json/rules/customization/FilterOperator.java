@@ -2,11 +2,7 @@ package com.bill.json.rules.customization;
 
 import com.bill.json.rules.customization.services.Rule;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-
-import static com.bill.json.rules.customization.services.factory.FilterRuleFactory.getInstance;
 
 /**
  * filter expression operator
@@ -17,6 +13,14 @@ import static com.bill.json.rules.customization.services.factory.FilterRuleFacto
  * @see ODataQueryExpression , ODataQueryResult
  */
 public enum FilterOperator {
+    /**
+     * all FilterOperator at level of ODataQuery are filtersContainer,
+     * and fill other FilterOperator with method withSubFilters
+     * and only support 'or' joint such like 'prefix?$filter=label1 eq 1 or abel1 eq 2'
+     * since 'and' joint can be implemented as 'prefix?$filter=label1 eq 1&$filter=abel1 eq 2'
+     */
+
+    or,
     eq,
     lt,
     gt,
@@ -25,29 +29,13 @@ public enum FilterOperator {
     contains,
     startWith,
     endWith,
-    isExist; //isprefix list element map has labels
+    isExist; //is prefix list element map has labels
 
     public Map<String, String> apply(Map<String, String> jsonpathMapValue) throws Exception{
-        return getRule().apply(jsonpathMapValue,getExpression());
+        return getRule().apply(jsonpathMapValue, getExpression());
     }
 
-    private String itemBeforeOperator;
-    private String itemAfterOperator;
 
-    public FilterOperator withItemBeforeOperator(String itemBeforeOperator){
-        this.itemBeforeOperator = itemBeforeOperator;
-        return this;
-    }
-    public String getItemBeforeOperator(){
-        return this.itemBeforeOperator;
-    }
-    public String getItemAfterOperator(){
-        return this.itemAfterOperator;
-    }
-    public FilterOperator withItemAfterOperator(String itemAfterOperator){
-        this.itemAfterOperator = itemAfterOperator;
-        return this;
-    }
 
     private Rule rule;
     public FilterOperator withRule(Rule rule){
@@ -67,19 +55,34 @@ public enum FilterOperator {
         return this.expression;
     }
 
-    //tempo sut support single customization, multi-customization will with and or not .. logic operator
-    public static FilterOperator getFilterOperator( ODataQueryExpression expression){
-        for(FilterOperator operator: values()){
-            List itemAroundOperator = Arrays.asList(expression.getExpression().split(operator.name()));
-            if(itemAroundOperator.size() == 2) {
-                operator.withItemBeforeOperator((String) itemAroundOperator.get(0));
-                operator.withItemAfterOperator((String) itemAroundOperator.get(1));
-                operator.withRule(getInstance(operator));
-                operator.withExpression(expression);
+    public static FilterOperator getFilterOperator(String expression) throws Exception {
+        for (FilterOperator operator : values()) {
+            if (expression.contains(operator.name())) {
                 return operator;
             }
         }
-        return null;
+        throw new Exception("not supported FilterOperator " + expression);
+    }
+
+    public static String getItemBeforeOperator(String expression){
+        if(!expression.contains(or.name())) {
+            for (FilterOperator operator : values()) {
+                if (expression.contains(operator.name())) {
+                    return expression.split(operator.name())[0];
+                }
+            }
+        }
+        return "";
+    }
+    public static String getItemAfterOperator(String expression){
+        if(!expression.contains(or.name())) {
+            for (FilterOperator operator : values()) {
+                if (expression.contains(operator.name())) {
+                    return expression.split(operator.name()).length == 2 ? expression.split(operator.name())[1] : "";
+                }
+            }
+        }
+        return "";
     }
 
 }

@@ -5,7 +5,6 @@ import com.bill.json.rules.customization.services.Rule;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,18 +21,22 @@ import java.util.Map;
 public class QueryTopService implements Rule {
     private static final Logger logger = LogManager.getLogger(QueryTopService.class);
     /**
-     * assume ODataQueryExpression.getExpression() like "n"
+     * assume ODataQueryExpression.getExpressions() like "n"
      *
      * @param originjsonPaths
      * @param topExpression
      * @return
      */
     @Override
-    public Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression topExpression) {
+    public Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression topExpression) throws Exception {
+        if (topExpression.getExpressions().size() != 1) {
+            throw new Exception("not supported multi top expression - " + topExpression.getExpressions());
+        }
+
         logger.info("getTop " + topExpression);
         Map<String, String> result = new HashMap();
         String prefixSorted = topExpression.getPrefix();
-        int top = Integer.parseInt(topExpression.getExpression().trim());
+        int top = Integer.parseInt(topExpression.getExpressions().get(0).trim());
 
         //collect all prefix[*]
         List<String> prefixs = new ArrayList();

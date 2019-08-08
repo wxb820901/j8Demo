@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public class QueryCountService implements Rule {
     /**
-     * assume ODataQueryExpression.getExpression() like ""
+     * assume ODataQueryExpression.getExpressions() like ""
      *
      * @param originjsonPaths
      * @param countExpression

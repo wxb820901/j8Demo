@@ -1,8 +1,8 @@
 package com.bill.json.rules.customization;
 
-import java.util.List;
 import java.util.Map;
 
+import static com.bill.json.rules.customization.ODataQueryParser.parseOperations;
 
 /**
  * endpoint of current OData implementation
@@ -92,12 +92,10 @@ public class RuleEngine {
      * @throws Exception
      */
     public String action(String json, String queryString) throws Exception {
-        Map<ODataQuery, List<ODataQueryExpression>> operations = ODataQueryParser.parseOperations(queryString);
+        Map<ODataQuery,ODataQueryExpression> querys = parseOperations(queryString);
         String tempJsonResult = json;
-        for (ODataQuery operation : operations.keySet()) {
-            for (ODataQueryExpression expression : operations.get(operation)) {
-                tempJsonResult = operation.apply(expression, tempJsonResult);
-            }
+        for (ODataQuery query : querys.keySet()) {
+            tempJsonResult = query.apply(querys.get(query), tempJsonResult);
         }
         return tempJsonResult;
 

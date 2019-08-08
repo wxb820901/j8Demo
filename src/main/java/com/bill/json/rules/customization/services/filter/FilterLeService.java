@@ -1,9 +1,9 @@
 package com.bill.json.rules.customization.services.filter;
 
-import com.bill.json.rules.customization.FilterOperator;
-import com.bill.json.rules.customization.ODataQueryExpression;
-
 import java.util.Map;
+
+import static com.bill.json.rules.customization.FilterOperator.getItemAfterOperator;
+import static com.bill.json.rules.customization.FilterOperator.getItemBeforeOperator;
 
 /**
  * implement of filter operator le
@@ -13,11 +13,11 @@ import java.util.Map;
  * @created 2019-08-05 10:30
  * @see ODataQueryExpression , ODataQueryResult
  */
-public class FilterLeService extends DefaultFilterService {
+public class FilterLeService extends DefaultNormalFilterService {
 
     @Override
-    boolean apply(Map map, FilterOperator operator) {
-        return Integer.parseInt((String) map.get(operator.getItemBeforeOperator().trim()))
-                <= Integer.parseInt(operator.getItemAfterOperator().trim());
+    public boolean compare(Map map, String expresison) {
+        return Integer.parseInt(map.get(getItemBeforeOperator(expresison).trim()).toString()) <=
+                Integer.parseInt(getItemAfterOperator(expresison).trim());
     }
 }

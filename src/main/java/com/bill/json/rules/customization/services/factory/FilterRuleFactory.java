@@ -1,8 +1,7 @@
 package com.bill.json.rules.customization.services.factory;
 
 import com.bill.json.rules.customization.FilterOperator;
-import com.bill.json.rules.customization.ODataQueryExpression;
-import com.bill.json.rules.customization.services.Rule;
+import com.bill.json.rules.customization.services.FilterRule;
 import com.bill.json.rules.customization.services.filter.*;
 
 /**
@@ -13,19 +12,20 @@ import com.bill.json.rules.customization.services.filter.*;
  * @created 2019-08-05 10:30
  * @see ODataQueryExpression , ODataQueryResult
  */
-public class FilterRuleFactory implements RuleAbstractFactory<FilterOperator> {
+public class FilterRuleFactory {
 
-    private static final Rule eqService = new FilterEqService();
-    private static final Rule ltService = new FilterLtService();
-    private static final Rule leService = new FilterLeService();
-    private static final Rule gtService = new FilterGtService();
-    private static final Rule geService = new FilterGeService();
-    private static final Rule containsService = new FilterContainsService();
-    private static final Rule startWithService = new FilterStartWithService();
-    private static final Rule endWithService = new FilterEndWithService();
-    private static final Rule isExistService = new FilterIsExistService();
+    private static final FilterRule eqService = new FilterEqService();
+    private static final FilterRule ltService = new FilterLtService();
+    private static final FilterRule leService = new FilterLeService();
+    private static final FilterRule gtService = new FilterGtService();
+    private static final FilterRule geService = new FilterGeService();
+    private static final FilterRule containsService = new FilterContainsService();
+    private static final FilterRule startWithService = new FilterStartWithService();
+    private static final FilterRule endWithService = new FilterEndWithService();
+    private static final FilterRule isExistService = new FilterIsExistService();
+    private static final FilterRule orService = new FilterORService();
 
-    public Rule getRule(FilterOperator filter) {
+    public FilterRule getRule(FilterOperator filter) {
         switch (filter) {
             case eq:
                 return eqService;
@@ -45,12 +45,14 @@ public class FilterRuleFactory implements RuleAbstractFactory<FilterOperator> {
                 return endWithService;
             case isExist:
                 return isExistService;
+            case or:
+                return orService;
             default:
                 return null;
         }
     }
 
-    public static Rule getInstance(FilterOperator filter) {
+    public static FilterRule getInstance(FilterOperator filter) {
         return new FilterRuleFactory().getRule(filter);
     }
 }

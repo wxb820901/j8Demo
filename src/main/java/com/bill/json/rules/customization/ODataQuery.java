@@ -7,18 +7,18 @@ import static com.bill.json.rules.customization.util.JsonUtil.convertMapToJson;
 
 /**
  * implement OData concrete operations
- *  ODataQuery:
- *      $filter,(just support 1 caondition, and/or/not will be supported is required )
- *          FilterOperator
+ *
+ *      $filter,
  *              eq
  *              lt
  *              gt
  *              ge
  *              le
- *              contains
+ *              contains (if value contains specific string)
  *              startWith
  *              endWith
- *              isExist
+ *              isExist (if label is exist)
+ *              or
  *      $select,
  *      $orderBy,(just support 1 label)
  *      $count,
@@ -39,7 +39,7 @@ public enum ODataQuery {
     $skip,
     $value {
         /*
-         * assume ODataQueryExpression.getExpression() like '=label1'
+         * assume ODataQueryExpression.getExpressions() like '=label1'
          * */
         public String apply(ODataQueryExpression expression, String json) throws Exception {
             throw new Exception("not supported customization $expand");
@@ -88,9 +88,9 @@ public enum ODataQuery {
 
     public static ODataQuery getQuery(String string) throws Exception {
         if (string != null) {
-            for (ODataQuery ODataQuery : values()) {
-                if (string.contains(ODataQuery.name())) {
-                    return ODataQuery;
+            for (ODataQuery oDataQuery : values()) {
+                if (string.contains(oDataQuery.name())) {
+                    return oDataQuery;
                 }
             }
         }

@@ -1,10 +1,12 @@
 package com.bill.json.rules.customization.services.query;
 
-import com.bill.json.rules.customization.FilterOperator;
 import com.bill.json.rules.customization.ODataQueryExpression;
 import com.bill.json.rules.customization.services.Rule;
+import com.bill.json.rules.customization.services.factory.FilterRuleFactory;
 
 import java.util.Map;
+
+import static com.bill.json.rules.customization.FilterOperator.getFilterOperator;
 
 /**
  * query function for filter
@@ -16,11 +18,14 @@ import java.util.Map;
  */
 public class QueryFilterService  implements Rule {
     @Override
-    public Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression countExpression) throws Exception {
-        //invoke each filter
+    public Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression filterExpression) throws Exception {
+        //invoke each operator of filter
         Map<String, String> tempoResult = originjsonPaths;
-        for(FilterOperator filterOperator: countExpression.getFilterOperators()){
-            tempoResult = filterOperator.apply(tempoResult);
+        for(String expression: filterExpression.getExpressions()){
+            tempoResult =
+                    FilterRuleFactory.getInstance(
+                            getFilterOperator(expression)
+                    ).apply(tempoResult, filterExpression.getPrefix(),expression);
         }
         return tempoResult;
     }

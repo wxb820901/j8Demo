@@ -13,7 +13,7 @@ import com.bill.json.rules.customization.services.query.*;
  * @created 2019-08-05 10:30
  * @see ODataQueryExpression , ODataQueryResult
  */
-public class QueryRuleFactory implements RuleAbstractFactory<ODataQuery> {
+public class QueryRuleFactory {
 
     private static final Rule queryCountService = new QueryCountService();
     private static final Rule queryOrderByService = new QueryOrderByService();

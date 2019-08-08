@@ -2,9 +2,10 @@ package com.bill.json.rules.customization.services.query;
 
 import com.bill.json.rules.customization.ODataQueryExpression;
 import com.bill.json.rules.customization.services.Rule;
-
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.bill.json.rules.customization.util.JsonUtil.replaceArrayIndexWithStar;
 
 /**
  * query function for $select
@@ -16,21 +17,25 @@ import java.util.stream.Collectors;
  */
 public class QuerySelectService implements Rule {
     /**
-     * assume ODataQueryExpression.getExpression() like 'label1, label2'
+     * assume ODataQueryExpression.getExpressions() like 'label1, label2'
      *
      * @param originjsonPaths
-     * @param filterOrSelect
+     * @param selectExpression
      * @return
      */
     @Override
-    public  Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression filterOrSelect) {
-        String[] wantedKeys = filterOrSelect.getExpression().split(",");
+    public  Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression selectExpression) throws Exception {
+
+        if (selectExpression.getExpressions().size() != 1) {
+            throw new Exception("not supported multi select expression - " + selectExpression.getExpressions());
+        }
+        String[] wantedKeys = selectExpression.getExpressions().get(0).split(",");
         return originjsonPaths
                 .entrySet().stream().filter(
                         entry -> {
                             for (String wantedKey : wantedKeys) {
-                                if (entry.getKey().indexOf(filterOrSelect.getPrefix()) > -1
-                                        && entry.getKey().indexOf(wantedKey.trim()) > -1) {
+                                if (entry.getKey().indexOf(selectExpression.getPrefix()) > -1
+                                        &&  replaceArrayIndexWithStar(wantedKey.trim(), entry.getKey()).indexOf(wantedKey.trim()) > -1) {
                                     return true;
                                 }
                             }

@@ -1,16 +1,13 @@
 package com.bill.json.rules.customization.util;
 
-import com.bill.json.rules.customization.ODataQueryExpression;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
-
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,8 +24,10 @@ import java.util.stream.Collectors;
 public class JsonUtil {
     private static final Logger logger = LogManager.getLogger(JsonUtil.class);
 
+
     /**
-     * get java.util.Map from a json
+     * json ==> map/list
+     * get a json structure map/list from a json
      *
      * @param json String json
      * @return Map or List of json structure
@@ -36,6 +35,85 @@ public class JsonUtil {
     public static Object getMapByJson(String json) {
         Gson gson = new Gson();
         return gson.fromJson(json, Map.class);
+    }
+
+
+    /**
+     *
+     * map/list ==> json
+     * get a json by a json structure map/list
+     *
+     * @param jsonMap a json structure map
+     * @return String
+     */
+    public static String getJsonByMap(Object jsonMap) {
+        if (jsonMap == null) {
+            return "{}";
+        }
+        Map<String, Object> outterMap = new LinkedHashMap<>();
+        outterMap.put("data", jsonMap);
+        JSONObject json = new JSONObject(outterMap);
+
+        return json.get("data").toString();
+    }
+
+
+    /**
+     * json ==> json path map
+     * Facade function to convert a json String to a map (of json path mapping to value)
+     */
+    public static Map<String, String> convertJsonToMap(String json) {
+        Map<String, String> jsonPathsMapingValue = new LinkedHashMap<>();
+        Object jsonObj = getMapByJson(json);
+        getJsonPathMapValue(JSON_PATH_PREFIX, jsonObj, jsonPathsMapingValue);
+        return jsonPathsMapingValue;
+    }
+
+
+    /**
+     * json path map ==> json
+     * Facade function to convert a map (of json path mapping and value) to a json String
+     */
+    public static String convertMapToJson(Map<String, String> json) {
+        Object jsonObj = getJsonMap(json);
+        return getJsonByMap(jsonObj);
+    }
+
+
+    /**
+     * json path ==> map/list
+     * @param json
+     * @return
+     */
+    public static Object convertJsonPathToMap(Map<String, String> json){
+        return getMapByJson(convertMapToJson(json));
+    }
+
+    /**
+     * map/list ==> json path
+     * @param obj
+     * @return
+     */
+    public static Map<String, String> convertMapToJsonPath(Object obj){
+        return convertJsonToMap(getJsonByMap(obj));
+    }
+
+
+    public static final String JSON_PATH_PREFIX = "$";
+
+    /**
+     * json path map ==> map
+     *
+     * @param jsonPathsMapValue json path and value map
+     * @return Object (list/map)
+     */
+    public static Object getJsonMap(Map<String, String> jsonPathsMapValue) {
+        Map merged = new LinkedHashMap();
+        for (String key : jsonPathsMapValue.keySet()) {
+            Object jsonMapByOneJsonPath = generateMapByJsonPath(key, jsonPathsMapValue.get(key));
+            mergeMap(merged, (Map) jsonMapByOneJsonPath);
+        }
+        return merged.get(JSON_PATH_PREFIX);
     }
 
     /**
@@ -46,8 +124,6 @@ public class JsonUtil {
      * @param jsonPathsMapingValue result map
      * @return void
      */
-    public static final String JSON_PATH_PREFIX = "$";
-
     public static void getJsonPathMapValue(String nameAppended, Object currentNode, Map<String, String> jsonPathsMapingValue) {
         if (nameAppended == null || "".equals(nameAppended.trim())) {
             nameAppended = JSON_PATH_PREFIX;
@@ -92,39 +168,6 @@ public class JsonUtil {
             jsonPathsMapingValue.put(nameAppended, currentNode.toString());
         }
     }
-
-    /**
-     * get a json structure map by a match json path and value entry map
-     *
-     * @param jsonPathsMapValue json path and value map
-     * @return Object (list/map)
-     */
-    public static Object getJsonMap(Map<String, String> jsonPathsMapValue) {
-        Map merged = new LinkedHashMap();
-        for (String key : jsonPathsMapValue.keySet()) {
-            Object jsonMapByOneJsonPath = generateMapByJsonPath(key, jsonPathsMapValue.get(key));
-            mergeMap(merged, (Map) jsonMapByOneJsonPath);
-        }
-        return merged.get(JSON_PATH_PREFIX);
-    }
-
-    /**
-     * get a json by a json structure map
-     *
-     * @param jsonMap a json structure map
-     * @return String
-     */
-    public static String getJsonByMap(Object jsonMap) {
-        if (jsonMap == null) {
-            return "{}";
-        }
-        Map<String, Object> outterMap = new LinkedHashMap<>();
-        outterMap.put("data", jsonMap);
-        JSONObject json = new JSONObject(outterMap);
-
-        return json.get("data").toString();
-    }
-
 
     /**
      * add element to list by index for generateMapByJsonPath
@@ -264,32 +307,165 @@ public class JsonUtil {
         System.out.println(prettyJsonString);
     }
 
-    /**
-     * Facade function to convert a json String to a map (of json path mapping to value)
-     */
-    public static Map<String, String> convertJsonToMap(String json) {
-        Map<String, String> jsonPathsMapingValue = new LinkedHashMap<>();
-        Object jsonObj = getMapByJson(json);
-        getJsonPathMapValue(JSON_PATH_PREFIX, jsonObj, jsonPathsMapingValue);
-        return jsonPathsMapingValue;
-    }
+
 
     /**
-     * Facade function to convert a map (of json path mapping and value) to a json String
+     * from a json structure like below, to get sub list of ceg/rs/instrument...
+     *                      "{\n" +
+     *                     "    \"ceg\":[\n" +
+     *                     "         {\n" +
+     *                     "             \"label1\":\"2\",\n" +
+     *                     "             \"label2\":\"prefix1[0].label2.value\",\n" +
+     *                     "             \"label3\":\"asas\"\n" +
+     *                     "         },\n" +
+     *                     "         {\n" +
+     *                     "             \"label1\":\"1\",\n" +
+     *                     "             \"label2\":\"prefix1[1].label2.value\",\n" +
+     *                     "             \"label3\":\"fgfg\"\n" +
+     *                     "         }\n" +
+     *                     "    ],\n" +
+     *                     "    \"rs\":[\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"asas\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          },\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"sdsdsdsd\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          }\n" +
+     *                     "    ],\n" +
+     *                     "    \"instrument\":[\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"asas\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          },\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"sdsdsdsd\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          }\n" +
+     *                     "    ],\n" +
+     *                     "    \"quote\":[\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"asas\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          },\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"sdsdsdsd\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          }\n" +
+     *                     "    ],\n" +
+     *                     "    \"org\":[\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"asas\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          },\n" +
+     *                     "          {\n" +
+     *                     "              \"label1\":\"sdsdsdsd\",\n" +
+     *                     "              \"label2\":\"dfdf\",\n" +
+     *                     "              \"label3\":\"fgfg\"\n" +
+     *                     "          }\n" +
+     *                     "    ]\n" +
+     *                     "}"
+     *
+     *
+     * @param originjsonPaths
+     * @param prefix
+     * @return
      */
-    public static String convertMapToJson(Map<String, String> json) {
-        Object jsonObj = getJsonMap(json);
-        return getJsonByMap(jsonObj);
-    }
 
 
-    public static Map<String, String> getListByPrefix(Map<String, String> originjsonPaths, ODataQueryExpression filterOrSelect) {
+
+    public static Map<String, String> getListByPrefix(Map<String, String> originjsonPaths, String prefix) {
         return originjsonPaths
                 .entrySet().stream().filter(
                         entry ->
-                                entry.getKey().indexOf(filterOrSelect.getPrefix()) > -1
+                                entry.getKey().indexOf(prefix) > -1
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
+    /**
+     * filter json path map key with array list inex = *
+     * for example,search json path map with
+     *      $.ceg[*].label1.l1d[1].l2a[*].l3v1
+     * result
+     *      $.ceg[1].label1.l1d[1].l2a[2].l3v1  ==> picked
+     *      $.ceg[1].label1.l1d[2].l2a[2].l3v1  ==> not picked
+     *      $.ceg[1].label1.l1d[1].l2a[3].l3v1  ==> picked
+     * @param originjsonPaths
+     * @param match
+     * @return
+     */
+    public static Map<String, String> getSubJsonPathMapWithArrayIndex(Map<String, String> originjsonPaths, String match){
+        return originjsonPaths.entrySet().stream().filter(
+                entry -> replaceArrayIndexWithStar(match, entry.getKey()).indexOf(match) > -1
+        ) .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * replace array index of path map key with *
+     * for example,
+     *      $.ceg[*].label1.l1d[1].l2a[*].l3v1
+     * result
+     *      $.ceg[1].label1.l1d[1].l2a[2].l3v1  ==> $.ceg[*].label1.l1d[1].l2a[*].l3v1
+     *      $.ceg[1].label1.l1d[2].l2a[2].l3v1  ==> $.ceg[*].label1.l1d[2].l2a[*].l3v1
+     *      $.ceg[1].label1.l1d[1].l2a[3].l3v1  ==> $.ceg[*].label1.l1d[1].l2a[*].l3v1
+     * @param match
+     * @param jsonPath
+     * @return
+     */
+    public static String replaceArrayIndexWithStar(String match, String jsonPath){
+
+        List<Boolean> starHappenWhen = Arrays.asList(
+                match.split("\\[")).stream().map(
+                        str -> '*' == str.charAt(0)
+        ).collect(Collectors.toList());
+        logger.info("replaceArrayIndexWithStar starHappenWhen="+starHappenWhen);
+        String[] splitedJsonpath = jsonPath.split("\\[");
+        if(splitedJsonpath.length >= starHappenWhen.size()){
+            StringBuilder result = new StringBuilder();
+            int index = 0;
+            for(String prieOfJsonPath: splitedJsonpath){
+                if(index!=0){
+                    result.append("[");
+                }
+                if(index < starHappenWhen.size()) {
+                    if(starHappenWhen.get(index)){
+                        result.append("*"+prieOfJsonPath.substring(prieOfJsonPath.indexOf("]")));
+                    }else{
+                        result.append(prieOfJsonPath);
+                    }
+                }else{
+                    result.append(prieOfJsonPath);
+                }
+                index++;
+            }
+            //prevent from the array consequence right but content in gap are not
+            if(result.toString().indexOf(match)>-1){
+                return result.toString();
+            }else{
+                return jsonPath;
+            }
+        }else{
+            return jsonPath;
+        }
+
+    }
+
+
+    public static String replaceArrayIndexWithStarWhereEver(String jsonPath){
+        return Arrays.asList(
+                jsonPath.split("\\[")).stream().map(
+                str -> "[*" + str.substring(str.indexOf("]"))).collect(Collectors.joining());
+    }
+
+
 }
 

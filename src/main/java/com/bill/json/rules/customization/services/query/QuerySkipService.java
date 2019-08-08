@@ -1,5 +1,4 @@
 package com.bill.json.rules.customization.services.query;
-
 import com.bill.json.rules.customization.ODataQueryExpression;
 import com.bill.json.rules.customization.services.Rule;
 import org.apache.log4j.LogManager;
@@ -21,18 +20,22 @@ import java.util.Map;
 public class QuerySkipService implements Rule {
     private static final Logger logger = LogManager.getLogger(QuerySkipService.class);
     /**
-     * assume ODataQueryExpression.getExpression() like "n"
+     * assume ODataQueryExpression.getExpressions() like "n"
      *
      * @param originjsonPaths
      * @param skipExpression
      * @return
      */
     @Override
-    public Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression skipExpression) {
+    public Map<String, String> apply(Map<String, String> originjsonPaths, ODataQueryExpression skipExpression) throws Exception {
+        if (skipExpression.getExpressions().size() != 1) {
+            throw new Exception("not supported multi skip expression - " + skipExpression.getExpressions());
+        }
+
         logger.info("getSkip " + skipExpression);
         Map<String, String> result = new HashMap();
         String prefixSorted = skipExpression.getPrefix();
-        int skip = Integer.parseInt(skipExpression.getExpression().trim());
+        int skip = Integer.parseInt(skipExpression.getExpressions().get(0).trim());
 
         //collect all prefix[*] distinct
         List<String> prefixs = new ArrayList();
