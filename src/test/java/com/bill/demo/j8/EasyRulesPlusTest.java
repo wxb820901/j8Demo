@@ -3,22 +3,18 @@ package com.bill.demo.j8;
 import com.bill.demo.easyrulesplus.RuleSetting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
-import org.jeasy.rules.annotation.Action;
-import org.jeasy.rules.annotation.Condition;
-import org.jeasy.rules.annotation.Fact;
 import org.jeasy.rules.api.Facts;
 import org.jeasy.rules.api.Rule;
 import org.jeasy.rules.api.Rules;
 import org.jeasy.rules.api.RulesEngine;
 import org.jeasy.rules.core.DefaultRulesEngine;
-import org.jeasy.rules.core.RuleBuilder;
 import org.jeasy.rules.core.RulesEngineParameters;
+import org.junit.Assert;
 import org.junit.Test;
-import org.testng.Assert;
 
 public class EasyRulesPlusTest {
     @Test
-    public void test(){
+    public void test() {
         RulesEngineParameters parameters = new RulesEngineParameters().skipOnFirstAppliedRule(true);
         RulesEngine fizzBuzzEngine = new DefaultRulesEngine(parameters);
 
@@ -80,7 +76,7 @@ public class EasyRulesPlusTest {
     }
 
     @Test
-    public void testJsonPath(){
+    public void testJsonPath() {
         String json = "{\n" +
                 "    \"store\": {\n" +
                 "        \"book\": [\n" +
@@ -121,11 +117,11 @@ public class EasyRulesPlusTest {
 
         Object document = Configuration.defaultConfiguration().jsonProvider().parse(json);
         String result = JsonPath.read(document, "$..book[*]").toString();
-        System.out.println("1==>"+result);
+        System.out.println("1==>" + result);
 
         document = Configuration.defaultConfiguration().jsonProvider().parse(result);
         result = JsonPath.read(document, "$[?(@.price <= $['expensive'])]").toString();
-        System.out.println("2==>"+result);
+        System.out.println("2==>" + result);
 
     }
 
