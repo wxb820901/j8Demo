@@ -2,6 +2,7 @@ package com.rules;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
