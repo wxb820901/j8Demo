@@ -10,8 +10,13 @@ import org.jeasy.rules.api.RulesEngine;
 import org.jeasy.rules.core.DefaultRulesEngine;
 import org.jeasy.rules.core.RuleBuilder;
 import org.jeasy.rules.core.RulesEngineParameters;
+import org.jeasy.rules.mvel.MVELRuleFactory;
 import org.jeasy.rules.support.UnitRuleGroup;
 import org.junit.Test;
+import redis.clients.jedis.AdvancedBinaryJedisCommands;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 
 public class EasyRulesTest {
     @Test
@@ -43,6 +48,7 @@ public class EasyRulesTest {
         for (int i = 1; i <= 100; i++) {
             facts.put("number", i);
             fizzBuzzEngine.fire(rules, facts);
+
             System.out.println();
         }
 
@@ -103,6 +109,24 @@ public class EasyRulesTest {
         @Action
         public void printInput(@Fact("number") Integer number) {
             System.out.print(number);
+        }
+    }
+
+    @Test
+    public void test2() throws FileNotFoundException {
+        // create a rules engine
+        RulesEngineParameters parameters = new RulesEngineParameters().skipOnFirstAppliedRule(true);
+        RulesEngine fizzBuzzEngine = new DefaultRulesEngine(parameters);
+
+        // create rules
+        Rules rules = MVELRuleFactory.createRulesFrom(new FileReader(this.getClass().getClassLoader().getResource("rules.yml").getFile()));
+
+        // fire rules
+        Facts facts = new Facts();
+        for (int i = 1; i <= 100; i++) {
+            facts.put("number", i);
+            fizzBuzzEngine.fire(rules, facts);
+            System.out.println();
         }
     }
 }
